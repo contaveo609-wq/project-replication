@@ -49,13 +49,17 @@ function AdminEntregadoresPage() {
 
   const handleSaveDriver = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingDriver?.name || !editingDriver.phone) {
+      toast.error("Informe o nome e o telefone do entregador.");
+      return;
+    }
     setIsSubmitting(true);
     
     try {
       const payload = {
-        name: editingDriver?.name,
+        name: editingDriver.name,
         nickname: editingDriver?.nickname || null,
-        phone: editingDriver?.phone,
+        phone: editingDriver.phone,
         whatsapp: editingDriver?.whatsapp || null,
         vehicle: editingDriver?.vehicle || null,
         plate: editingDriver?.plate || null,

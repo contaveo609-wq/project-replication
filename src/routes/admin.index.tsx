@@ -30,12 +30,12 @@ function AdminDashboard() {
           .gte("created_at", today.toISOString()),
         supabase
           .from("orders")
-          .select("total_amount")
+          .select("total")
           .gte("created_at", today.toISOString())
-          .eq("status", "completed"),
+          .eq("status", "entregue"),
       ]);
 
-      const revenue = (orders ?? []).reduce((acc, curr) => acc + Number(curr.total_amount), 0);
+      const revenue = (orders ?? []).reduce((acc, curr) => acc + Number(curr.total), 0);
 
       return {
         orders: ordersCount ?? 0,

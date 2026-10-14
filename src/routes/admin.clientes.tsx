@@ -17,7 +17,7 @@ function AdminClientesPage() {
     queryKey: ['admin_clientes'],
     queryFn: async () => {
       try {
-        const { data: orders, error } = await supabase.from('orders').select('customer_name, customer_phone, total_amount, created_at, status');
+        const { data: orders, error } = await supabase.from('orders').select('customer_name, customer_phone, total, created_at, status');
         if (error || !orders) return [];
 
         // Agrupar pedidos por telefone para formar "clientes"
@@ -35,8 +35,8 @@ function AdminClientesPage() {
           };
 
           current.pedidos += 1;
-          if (order.status === 'completed') {
-            current.gastoTotal += Number(order.total_amount || 0);
+          if (order.status === 'entregue') {
+            current.gastoTotal += Number(order.total || 0);
           }
           if (new Date(order.created_at) > new Date(current.ultimaCompra)) {
             current.ultimaCompra = order.created_at;

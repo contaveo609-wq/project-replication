@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, Edit2, Trash2, GripVertical, AlertCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -54,7 +54,6 @@ function AdminCategoriasPage() {
                       <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
                       {cat.name}
                     </CardTitle>
-                    <CardDescription>{cat.description || 'Sem descrição'}</CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>

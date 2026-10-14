@@ -19,15 +19,15 @@ function AdminRelatoriosPage() {
 
         const { data: orders } = await supabase
           .from("orders")
-          .select("total_amount, status, payment_method, delivery_fee")
+          .select("total, status, payment_method, delivery_fee")
           .gte("created_at", startOfMonth.toISOString());
 
         if (!orders || orders.length === 0) {
           return { revenue: 0, count: 0, ticket: 0, deliveryCost: 0, methods: {} };
         }
 
-        const completedOrders = orders.filter(o => o.status === 'completed');
-        const revenue = completedOrders.reduce((acc, curr) => acc + Number(curr.total_amount), 0);
+        const completedOrders = orders.filter(o => o.status === 'entregue');
+        const revenue = completedOrders.reduce((acc, curr) => acc + Number(curr.total), 0);
         const deliveryCost = completedOrders.reduce((acc, curr) => acc + Number(curr.delivery_fee || 0), 0);
         const count = completedOrders.length;
         const ticket = count > 0 ? revenue / count : 0;

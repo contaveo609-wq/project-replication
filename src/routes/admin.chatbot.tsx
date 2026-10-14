@@ -99,8 +99,8 @@ function AdminChatbotPage() {
   useEffect(() => {
     if (siteConfig) {
       setPrompt((siteConfig as any).system_prompt ?? "");
-      setGreeting((siteConfig as any).greeting_message ?? "");
-      setIsActiveSite((siteConfig as any).is_active ?? false);
+      setGreeting((siteConfig as any).welcome_message ?? "");
+      setIsActiveSite((siteConfig as any).is_enabled ?? false);
     }
   }, [siteConfig]);
 
@@ -116,8 +116,8 @@ function AdminChatbotPage() {
     mutationFn: async () => {
       const payload = {
         system_prompt: prompt,
-        greeting_message: greeting,
-        is_active: isActiveSite,
+        welcome_message: greeting,
+        is_enabled: isActiveSite,
         id: (siteConfig as any)?.id,
       };
       if ((siteConfig as any)?.id) {
@@ -176,7 +176,7 @@ function AdminChatbotPage() {
       const r = await listGeminiModels();
       if ((r as any).success && (r as any).models.length > 0) {
         const names = (r as any).models.map((m: Record<string,unknown>) => {
-          const name = m.name as string;
+          const name = m['name'] as string;
           return name.replace("models/", "");
         });
         setAvailableModels(names);
