@@ -81,15 +81,15 @@ function AdminPendenciasIAPage() {
                       <strong className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1 text-xs uppercase tracking-wider">
                         Cliente perguntou:
                       </strong>
-                      <p className="text-slate-900 dark:text-slate-100 italic">"{pendencia.query_text}"</p>
+                      <p className="text-slate-900 dark:text-slate-100 italic">"{pendencia.user_message}"</p>
                     </div>
-                    {pendencia.bot_context && (
+                    {pendencia.bot_response && (
                       <div className="pt-3 border-t">
                         <strong className="text-slate-500 flex items-center gap-1.5 mb-1 text-xs uppercase tracking-wider">
                           Contexto da Brenda (IA):
                         </strong>
                         <p className="text-slate-600 dark:text-slate-400 text-xs">
-                          {pendencia.bot_context}
+                          {pendencia.bot_response}
                         </p>
                       </div>
                     )}

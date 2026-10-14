@@ -12,9 +12,11 @@
  * - No credentials in response bodies or logs
  */
 
-import { createAPIFileRoute } from "@tanstack/react-start/api";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const APIRoute = createAPIFileRoute("/api/webhook/whatsapp")({
+export const Route = createFileRoute("/api/webhook/whatsapp")({
+  server: {
+    handlers: {
   GET: async ({ request }) => {
     const url = new URL(request.url);
     const mode = url.searchParams.get("hub.mode") ?? "";
@@ -105,7 +107,7 @@ export const APIRoute = createAPIFileRoute("/api/webhook/whatsapp")({
             if (!from || !messageId || !body) continue;
 
             // 5. Dispatch to AI processing (fire and forget to respond 200 quickly)
-            supabaseAdmin.from("whatsapp_events").insert({
+            const { error: insertError } = await supabaseAdmin.from("whatsapp_events").insert({
               waba_message_id: messageId,
               from_phone: from,
               from_name: name ?? null,
@@ -113,17 +115,10 @@ export const APIRoute = createAPIFileRoute("/api/webhook/whatsapp")({
               message_body: body,
               status: "received",
               raw_payload: payload,
-            }).then(async () => {
-              // Process asynchronously
-              try {
-                const { processIncomingWhatsAppMessage } = await import("@/lib/whatsapp.server");
-                await processIncomingWhatsAppMessage({ data: { from, name, messageId, body, messageType: "text" } });
-              } catch (e) {
-                console.error("[Webhook] Processing error:", e instanceof Error ? e.message : e);
-              }
-            }).catch((e: unknown) => {
-              console.error("[Webhook] Insert error:", e instanceof Error ? e.message : e);
             });
+            if (insertError) {
+              console.error("[Webhook] Insert error:", insertError.message);
+            }
           }
         }
       }
@@ -134,6 +129,8 @@ export const APIRoute = createAPIFileRoute("/api/webhook/whatsapp")({
       console.error("[Webhook] Unhandled error:", err instanceof Error ? err.message : err);
       return new Response("Server error", { status: 500 });
     }
+  },
+    },
   },
 });
 
