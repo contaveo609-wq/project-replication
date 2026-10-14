@@ -107,7 +107,7 @@ export const Route = createFileRoute("/api/webhook/whatsapp")({
             if (!from || !messageId || !body) continue;
 
             // 5. Dispatch to AI processing (fire and forget to respond 200 quickly)
-            const { error: insertError } = await supabaseAdmin.from("whatsapp_events").insert({
+            const { error: insertError } = await (supabaseAdmin as any).from("whatsapp_events").insert({
               waba_message_id: messageId,
               from_phone: from,
               from_name: name ?? null,

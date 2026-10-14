@@ -19,7 +19,7 @@ function AdminProdutosPage() {
     queryKey: ['admin_products'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('products').select(`*, category:categories(name), product_images(image_url, is_primary, sort_order)`).order('name');
+        const { data, error } = await supabase.from('products').select(`*, category:categories(name), product_images(url, is_primary, sort_order)`).order('name');
         if (error) return [];
         return data;
       } catch (e) {
@@ -88,8 +88,8 @@ function AdminProdutosPage() {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-100 rounded object-cover overflow-hidden flex items-center justify-center border">
-                          {product.product_images?.[0]?.image_url ? (
-                            <img src={product.product_images[0].image_url} alt={product.name} className="w-full h-full object-cover" />
+                          {product.product_images?.[0]?.url ? (
+                            <img src={product.product_images[0].url} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
                             <span className="text-xs text-gray-400">Sem foto</span>
                           )}
