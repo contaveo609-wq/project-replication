@@ -43,6 +43,7 @@ import { Route as AdminTestesIntegracoesRouteImport } from './routes/admin.teste
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
+import { Route as ApiWebhookWhatsappRouteImport } from './routes/api/webhook.whatsapp'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -214,6 +215,11 @@ const PedidoIdRoute = PedidoIdRouteImport.update({
   path: '/pedido/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhookWhatsappRoute = ApiWebhookWhatsappRouteImport.update({
+  id: '/api/webhook/whatsapp',
+  path: '/api/webhook/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/webhook/whatsapp': typeof ApiWebhookWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/admin': typeof AdminIndexRoute
+  '/api/webhook/whatsapp': typeof ApiWebhookWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -320,6 +328,7 @@ export interface FileRoutesById {
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/webhook/whatsapp': typeof ApiWebhookWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/admin/whatsapp'
     | '/pedido/$id'
     | '/admin/'
+    | '/api/webhook/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/admin/whatsapp'
     | '/pedido/$id'
     | '/admin'
+    | '/api/webhook/whatsapp'
   id:
     | '__root__'
     | '/'
@@ -427,6 +438,7 @@ export interface FileRouteTypes {
     | '/admin/whatsapp'
     | '/pedido/$id'
     | '/admin/'
+    | '/api/webhook/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   TermosRoute: typeof TermosRoute
   PedidoIdRoute: typeof PedidoIdRoute
+  ApiWebhookWhatsappRoute: typeof ApiWebhookWhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -683,6 +696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PedidoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhook/whatsapp': {
+      id: '/api/webhook/whatsapp'
+      path: '/api/webhook/whatsapp'
+      fullPath: '/api/webhook/whatsapp'
+      preLoaderRoute: typeof ApiWebhookWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -761,6 +781,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   TermosRoute: TermosRoute,
   PedidoIdRoute: PedidoIdRoute,
+  ApiWebhookWhatsappRoute: ApiWebhookWhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

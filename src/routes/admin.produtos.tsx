@@ -19,7 +19,7 @@ function AdminProdutosPage() {
     queryKey: ['admin_products'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('products').select(`*, category:categories(name)`).order('name');
+        const { data, error } = await supabase.from('products').select(`*, category:categories(name), product_images(url, is_primary, sort_order)`).order('name');
         if (error) return [];
         return data;
       } catch (e) {
@@ -28,8 +28,8 @@ function AdminProdutosPage() {
     }
   });
 
-  const toggleAvailability = async (id: string, currentAvailable: boolean) => {
-    await supabase.from('products').update({ is_available: !currentAvailable }).eq('id', id);
+  const toggleAvailability = async (id: string, isSoldOut: boolean) => {
+    await supabase.from('products').update({ is_sold_out: !isSoldOut }).eq('id', id);
     queryClient.invalidateQueries({ queryKey: ['admin_products'] });
   };
 
@@ -88,8 +88,8 @@ function AdminProdutosPage() {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-100 rounded object-cover overflow-hidden flex items-center justify-center border">
-                          {product.image_url ? (
-                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                          {product.product_images?.[0]?.url ? (
+                            <img src={product.product_images[0].url} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
                             <span className="text-xs text-gray-400">Sem foto</span>
                           )}
@@ -98,9 +98,9 @@ function AdminProdutosPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-500">{(product.category as any)?.name || 'Sem categoria'}</TableCell>
-                    <TableCell className="font-medium">{formatCurrency(product.base_price || 0)}</TableCell>
+                    <TableCell className="font-medium">{formatCurrency(product.price || 0)}</TableCell>
                     <TableCell>
-                      {product.is_available ? (
+                      {!product.is_sold_out ? (
                         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Disponível</Badge>
                       ) : (
                         <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Esgotado</Badge>
@@ -110,10 +110,10 @@ function AdminProdutosPage() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className={product.is_available ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
-                        onClick={() => toggleAvailability(product.id, product.is_available)}
+                        className={!product.is_sold_out ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
+                        onClick={() => toggleAvailability(product.id, product.is_sold_out)}
                       >
-                        {product.is_available ? (
+                        {!product.is_sold_out ? (
                           <><PackageX className="w-4 h-4 mr-1" /> Marcar Esgotado</>
                         ) : (
                           <><PackageCheck className="w-4 h-4 mr-1" /> Reativar</>

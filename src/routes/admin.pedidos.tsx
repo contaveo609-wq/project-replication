@@ -329,7 +329,7 @@ function AdminPedidosPage() {
                   )}
                   
                   {['recebido', 'em_preparacao'].includes(orderDetails.status) && (
-                    <Button variant="destructive" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50" onClick={() => handleStatusChange(orderDetails.id, 'cancelado')}>
+                    <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50" onClick={() => handleStatusChange(orderDetails.id, 'cancelado')}>
                       RECUSAR / CANCELAR
                     </Button>
                   )}

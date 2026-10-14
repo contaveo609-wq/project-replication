@@ -99,8 +99,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
           setUser({ ...found.user });
         } else {
           // Update to current master user if old session exists
-          setUser({ ...TEST_USERS[0].user });
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(TEST_USERS[0].user));
+          const masterUser = TEST_USERS[0]?.user;
+          if (masterUser) {
+            setUser({ ...masterUser });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(masterUser));
+          }
         }
       }
     } catch {

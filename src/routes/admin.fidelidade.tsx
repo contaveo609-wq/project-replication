@@ -63,7 +63,7 @@ function AdminFidelidadePage() {
                   <p className="text-xs text-gray-500 mb-2">Quantos reais equivalem a 1 ponto?</p>
                   <div className="flex items-center gap-2">
                     <span className="text-sm">R$</span>
-                    <Input defaultValue={config.points_per_currency || 1} type="number" className="w-24" />
+                    <Input defaultValue={config.points_per_real || 1} type="number" className="w-24" />
                     <span className="text-sm">= 1 Ponto</span>
                   </div>
                 </div>
@@ -72,7 +72,7 @@ function AdminFidelidadePage() {
                   <label className="text-sm font-semibold text-gray-900">Cashback / Resgate</label>
                   <p className="text-xs text-gray-500 mb-2">Quantos pontos são necessários para R$ 1,00 de desconto?</p>
                   <div className="flex items-center gap-2">
-                    <Input defaultValue={config.redemption_rate || 10} type="number" className="w-24" />
+                    <Input defaultValue={config.points_to_redeem || 10} type="number" className="w-24" />
                     <span className="text-sm">Pontos = R$ 1,00</span>
                   </div>
                 </div>

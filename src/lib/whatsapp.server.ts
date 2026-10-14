@@ -54,7 +54,7 @@ export const saveWhatsAppConfig = createServerFn({ method: "POST" })
       last_test_error: null,
     };
     if (data.app_secret && data.app_secret.trim() !== "") {
-      payload.app_secret_hash = data.app_secret;
+      payload['app_secret_hash'] = data.app_secret;
     }
     const { error } = await (supabaseAdmin as any).from("whatsapp_config").upsert({ ...payload, id: true });
     if (error) throw new Error(error.message);
@@ -150,7 +150,7 @@ export const saveGeminiConfig = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
     };
     if (data.gemini_api_key && data.gemini_api_key.trim() !== "") {
-      payload.gemini_api_key_masked = maskKey(data.gemini_api_key.trim());
+      payload['gemini_api_key_masked'] = maskKey(data.gemini_api_key.trim());
     }
     const { error } = await (supabaseAdmin as any).from("gemini_config").update(payload).eq("id", true);
     if (error) throw new Error(error.message);
@@ -190,18 +190,24 @@ export const testGeminiConnection = createServerFn({ method: "POST" })
 // List Gemini Models
 export const listGeminiModels = createServerFn({ method: "GET" })
   .handler(async () => {
+    type GeminiModel = {
+      name: string;
+      displayName?: string;
+      description?: string;
+      supportedGenerationMethods: string[];
+    };
     const apiKey = process.env["GEMINI_API_KEY"];
     if (!apiKey) return { success: false, models: [], error: "GEMINI_API_KEY nao configurado." };
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=50`);
       const json = (await res.json()) as Record<string, unknown>;
       if (!res.ok) return { success: false, models: [], error: (json as any)?.error?.message };
-      const models = ((json as any)?.models ?? []) as Array<Record<string, unknown>>;
+      const models = ((json as { models?: GeminiModel[] }).models ?? []);
       const filtered = models.filter((m) =>
         typeof m.name === "string" &&
         m.name.includes("gemini") &&
         Array.isArray(m.supportedGenerationMethods) &&
-        (m.supportedGenerationMethods as string[]).includes("generateContent")
+        m.supportedGenerationMethods.includes("generateContent")
       );
       return { success: true, models: filtered };
     } catch (err: unknown) {
@@ -285,7 +291,7 @@ export const processIncomingWhatsAppMessage = createServerFn({ method: "POST" })
 
     const knowledge = {
       loja: { nome: settings?.store_name, endereco: settings?.address_line, horario: settings?.opening_hours, aberta: settings?.is_open, tempo_entrega: `${settings?.delivery_time_min}-${settings?.delivery_time_max} minutos (estimativa)`, taxa_entrega: Number(settings?.delivery_fee ?? 0) },
-      produtos: (products ?? []).map((p: Record<string,unknown>) => ({ nome: p.name, categoria: (p.categories as any)?.name ?? null, descricao: p.description, preco: Number(p.price), disponivel: p.is_active && !p.is_sold_out, esgotado: p.is_sold_out })),
+      produtos: (products ?? []).map((p: Record<string,unknown>) => ({ nome: p['name'], categoria: (p['categories'] as any)?.name ?? null, descricao: p['description'], preco: Number(p['price']), disponivel: Boolean(p['is_active']) && !p['is_sold_out'], esgotado: Boolean(p['is_sold_out']) })),
     };
 
     const systemInstruction = [
@@ -374,7 +380,7 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
       const start = Date.now();
       try {
         const r = await fn();
-        results.push({ id, name, status: r.ok ? "passed" : "failed", detail: r.detail, duration: Date.now() - start });
+        results.push({ id, name, status: r.ok ? "passed" : "failed", detail: r.detail ?? "", duration: Date.now() - start });
       } catch (err: unknown) {
         results.push({ id, name, status: "failed", detail: err instanceof Error ? err.message : "Erro desconhecido", duration: Date.now() - start });
       }
