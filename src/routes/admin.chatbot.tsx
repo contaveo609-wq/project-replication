@@ -147,7 +147,7 @@ function AdminChatbotPage() {
   const [greeting, setGreeting] = useState("");
   const [isActiveSite, setIsActiveSite] = useState(false);
   const [isActiveWA, setIsActiveWA] = useState(false);
-  const [geminiModel, setGeminiModel] = useState("gemini-2.5-flash-lite-preview-06-17");
+  const [geminiModel, setGeminiModel] = useState("gemini-3.5-flash-lite");
   const [dailyLimit, setDailyLimit] = useState(500);
   const [contextWindow, setContextWindow] = useState(5);
   const [freeTierOnly, setFreeTierOnly] = useState(true);
@@ -189,7 +189,7 @@ function AdminChatbotPage() {
 
   useEffect(() => {
     if (geminiConfig) {
-      setGeminiModel((geminiConfig as any).gemini_model ?? "gemini-2.5-flash-lite-preview-06-17");
+      setGeminiModel((geminiConfig as any).gemini_model ?? "gemini-3.5-flash-lite");
       setDailyLimit((geminiConfig as any).daily_limit ?? 500);
       setIsActiveWA((geminiConfig as any).is_active ?? false);
       setFreeTierOnly((geminiConfig as any).free_tier_only ?? true);
