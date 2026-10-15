@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Map external model-list responses to explicit serializable DTOs before returning from server functions, so RPC types cannot include unknown provider fields.

@@ -310,7 +310,7 @@ function AdminChatbotPage() {
       const r = await listGeminiModels();
       if ((r as any).success && (r as any).models.length > 0) {
         const names = (r as any).models.map((m: Record<string, unknown>) => {
-          const name = (m.name ?? m["name"]) as string;
+          const name = m["name"] as string;
           return name.replace("models/", "");
         });
         setAvailableModels(names);
