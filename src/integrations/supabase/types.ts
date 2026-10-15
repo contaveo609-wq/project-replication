@@ -399,6 +399,30 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_messages: {
+        Row: {
+          content: string
+          conversation_phone: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_phone: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_phone?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
       coupon_usages: {
         Row: {
           coupon_id: string
@@ -581,6 +605,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gemini_config: {
+        Row: {
+          ai_instructions: string
+          context_window: number
+          daily_limit: number
+          daily_reset_at: string | null
+          daily_tokens_reset_at: string | null
+          daily_tokens_used: number
+          daily_used: number
+          free_tier_only: boolean
+          gemini_api_key_encrypted: string | null
+          gemini_api_key_masked: string | null
+          gemini_api_key_set_at: string | null
+          gemini_model: string
+          id: boolean
+          is_active: boolean
+          last_error: string | null
+          last_used_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_instructions?: string
+          context_window?: number
+          daily_limit?: number
+          daily_reset_at?: string | null
+          daily_tokens_reset_at?: string | null
+          daily_tokens_used?: number
+          daily_used?: number
+          free_tier_only?: boolean
+          gemini_api_key_encrypted?: string | null
+          gemini_api_key_masked?: string | null
+          gemini_api_key_set_at?: string | null
+          gemini_model?: string
+          id?: boolean
+          is_active?: boolean
+          last_error?: string | null
+          last_used_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_instructions?: string
+          context_window?: number
+          daily_limit?: number
+          daily_reset_at?: string | null
+          daily_tokens_reset_at?: string | null
+          daily_tokens_used?: number
+          daily_used?: number
+          free_tier_only?: boolean
+          gemini_api_key_encrypted?: string | null
+          gemini_api_key_masked?: string | null
+          gemini_api_key_set_at?: string | null
+          gemini_model?: string
+          id?: boolean
+          is_active?: boolean
+          last_error?: string | null
+          last_used_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       ia_unresolved_queries: {
         Row: {
@@ -1425,6 +1509,57 @@ export type Database = {
           last_message_at?: string
           unread_count?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          from_name: string | null
+          from_phone: string
+          gemini_model_used: string | null
+          gemini_response: string | null
+          gemini_tokens_used: number | null
+          id: string
+          message_body: string | null
+          message_type: string
+          raw_payload: Json | null
+          replied_at: string | null
+          status: string
+          waba_message_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          from_name?: string | null
+          from_phone: string
+          gemini_model_used?: string | null
+          gemini_response?: string | null
+          gemini_tokens_used?: number | null
+          id?: string
+          message_body?: string | null
+          message_type?: string
+          raw_payload?: Json | null
+          replied_at?: string | null
+          status?: string
+          waba_message_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          from_name?: string | null
+          from_phone?: string
+          gemini_model_used?: string | null
+          gemini_response?: string | null
+          gemini_tokens_used?: number | null
+          id?: string
+          message_body?: string | null
+          message_type?: string
+          raw_payload?: Json | null
+          replied_at?: string | null
+          status?: string
+          waba_message_id?: string | null
         }
         Relationships: []
       }
