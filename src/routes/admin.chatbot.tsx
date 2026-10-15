@@ -35,11 +35,11 @@ export const Route = createFileRoute("/admin/chatbot")({
 // ============================================================
 const GEMINI_MODELS_FREE = [
   {
-    id: "gemini-2.5-flash-lite-preview-06-17",
-    name: "Gemini 2.5 Flash Lite",
+    id: "gemini-3.5-flash-lite",
+    name: "Gemini 3.5 Flash Lite",
     tag: "RECOMENDADO",
     tagColor: "bg-green-600",
-    desc: "Modelo mais leve e rápido. Ideal para atendimento de alto volume. Respostas simples e diretas.",
+    desc: "Modelo mais leve e rápido. Ideal para atendimento de alto volume.",
     speed: "Muito rápido",
     quality: "Boa para atendimento simples",
     rpm: 15,
@@ -51,11 +51,11 @@ const GEMINI_MODELS_FREE = [
     recommended: true,
   },
   {
-    id: "gemini-2.5-flash",
-    name: "Gemini 2.5 Flash",
+    id: "gemini-3.5-flash",
+    name: "Gemini 3.5 Flash",
     tag: "BALANCEADO",
     tagColor: "bg-blue-600",
-    desc: "Versão completa do Flash. Mais inteligente, ideal para conversas complexas e perguntas ambíguas.",
+    desc: "Mais inteligente, ideal para conversas complexas.",
     speed: "Rápido",
     quality: "Ótima para atendimento complexo",
     rpm: 10,
@@ -64,38 +64,6 @@ const GEMINI_MODELS_FREE = [
     estimatedDailyConversations: "~50–100",
     freeTier: true,
     note: "Bom equilíbrio entre qualidade e limite gratuito",
-    recommended: false,
-  },
-  {
-    id: "gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
-    tag: "ALTERNATIVA",
-    tagColor: "bg-purple-600",
-    desc: "Geração anterior. Rápido e confiável para atendimentos padrão.",
-    speed: "Rápido",
-    quality: "Boa para atendimento padrão",
-    rpm: 15,
-    rpd: 1500,
-    tpm: 1000000,
-    estimatedDailyConversations: "~150–300",
-    freeTier: true,
-    note: "Boa alternativa se o 2.5 Lite não estiver disponível",
-    recommended: false,
-  },
-  {
-    id: "gemini-2.5-pro",
-    name: "Gemini 2.5 Pro",
-    tag: "PAGO",
-    tagColor: "bg-red-600",
-    desc: "Modelo mais avançado. Não disponível no plano gratuito para uso em produção.",
-    speed: "Moderado",
-    quality: "Excelente",
-    rpm: 0,
-    rpd: 0,
-    tpm: 0,
-    estimatedDailyConversations: "—",
-    freeTier: false,
-    note: "Requer faturamento ativo",
     recommended: false,
   },
 ];
@@ -179,7 +147,7 @@ function AdminChatbotPage() {
   const [greeting, setGreeting] = useState("");
   const [isActiveSite, setIsActiveSite] = useState(false);
   const [isActiveWA, setIsActiveWA] = useState(false);
-  const [geminiModel, setGeminiModel] = useState("gemini-2.5-flash-lite-preview-06-17");
+  const [geminiModel, setGeminiModel] = useState("gemini-3.5-flash-lite");
   const [dailyLimit, setDailyLimit] = useState(500);
   const [contextWindow, setContextWindow] = useState(5);
   const [freeTierOnly, setFreeTierOnly] = useState(true);
@@ -221,7 +189,7 @@ function AdminChatbotPage() {
 
   useEffect(() => {
     if (geminiConfig) {
-      setGeminiModel((geminiConfig as any).gemini_model ?? "gemini-2.5-flash-lite-preview-06-17");
+      setGeminiModel((geminiConfig as any).gemini_model ?? "gemini-3.5-flash-lite");
       setDailyLimit((geminiConfig as any).daily_limit ?? 500);
       setIsActiveWA((geminiConfig as any).is_active ?? false);
       setFreeTierOnly((geminiConfig as any).free_tier_only ?? true);

@@ -285,7 +285,7 @@ export const testGeminiConnection = createServerFn({ method: "POST" })
       .from("gemini_config")
       .select("gemini_model")
       .maybeSingle();
-    const model = config?.gemini_model ?? "gemini-2.5-flash-lite-preview-06-17";
+    const model = config?.gemini_model ?? "gemini-3.5-flash-lite";
     try {
       const start = Date.now();
       const controller = new AbortController();
@@ -532,7 +532,7 @@ export const processIncomingWhatsAppMessage = createServerFn({ method: "POST" })
       return { success: false, error: "Chave Gemini nao configurada" };
     }
 
-    const model = geminiConfig.gemini_model ?? "gemini-2.5-flash-lite-preview-06-17";
+    const model = geminiConfig.gemini_model ?? "gemini-3.5-flash-lite";
 
     // Build contents: last N messages + current message
     const contents = [
@@ -764,7 +764,7 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
     }));
     await run("gemini_api", "Gemini: Chamada Real de Validacao", async () => {
       if (!geminiKey) return { ok: false, detail: "Chave Gemini nao configurada — pendencia externa" };
-      const model = geminiConfig?.gemini_model ?? "gemini-2.5-flash-lite-preview-06-17";
+      const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
       try {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
@@ -789,7 +789,7 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
     // Context memory test
     await run("gemini_context", "Gemini: Memoria Contextual (5 mensagens)", async () => {
       if (!geminiKey) return { ok: false, detail: "Requer chave Gemini configurada" };
-      const model = geminiConfig?.gemini_model ?? "gemini-2.5-flash-lite-preview-06-17";
+      const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
       try {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
@@ -825,7 +825,7 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
     // Full flow test
     await run("full_flow", "Fluxo Completo: Simulacao de Atendimento", async () => {
       if (!geminiKey) return { ok: false, detail: "Requer chave Gemini configurada" };
-      const model = geminiConfig?.gemini_model ?? "gemini-2.5-flash-lite-preview-06-17";
+      const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
       const { data: products } = await (supabaseAdmin as any)
         .from("products")
         .select("name,price,is_active")
@@ -935,7 +935,7 @@ export const simulateConversation = createServerFn({ method: "POST" })
       })),
     };
 
-    const model = geminiConfig?.gemini_model ?? "gemini-2.5-flash-lite-preview-06-17";
+    const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
     const systemInstruction = [
       geminiConfig?.ai_instructions ?? "Voce e um atendente virtual.",
       `\nDADOS: ${JSON.stringify(knowledge)}`,
