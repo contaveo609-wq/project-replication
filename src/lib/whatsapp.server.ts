@@ -241,9 +241,9 @@ export const saveGeminiConfig = createServerFn({ method: "POST" })
     // If a new API key is provided, save it in DB (service_role only column)
     if (data.gemini_api_key && data.gemini_api_key.trim() !== "") {
       const keyVal = data.gemini_api_key.trim();
-      payload.gemini_api_key_encrypted = keyVal;
-      payload.gemini_api_key_masked = maskKey(keyVal);
-      payload.gemini_api_key_set_at = new Date().toISOString();
+      payload['gemini_api_key_encrypted'] = keyVal;
+      payload['gemini_api_key_masked'] = maskKey(keyVal);
+      payload['gemini_api_key_set_at'] = new Date().toISOString();
     }
 
     // Use upsert — atomic, no race conditions, works whether row exists or not
@@ -326,13 +326,13 @@ export const listGeminiModels = createServerFn({ method: "GET" })
       const json = (await res.json()) as Record<string, unknown>;
       if (!res.ok) return { success: false, models: [], error: (json as any)?.error?.message };
       const models = ((json as any)?.models ?? []) as Array<Record<string, unknown>>;
-      const filtered = models.filter(
-        (m) =>
-          typeof m.name === "string" &&
-          m.name.includes("gemini") &&
-          Array.isArray(m.supportedGenerationMethods) &&
-          (m.supportedGenerationMethods as string[]).includes("generateContent")
-      );
+      const filtered = models.flatMap((m) => {
+        const name = m['name'];
+        const methods = m['supportedGenerationMethods'];
+        if (typeof name !== "string" || !name.includes("gemini") ||
+            !Array.isArray(methods) || !methods.includes("generateContent")) return [];
+        return [{ name, supportedGenerationMethods: methods.filter((method): method is string => typeof method === "string") }];
+      });
       return { success: true, models: filtered };
     } catch (err: unknown) {
       return { success: false, models: [], error: err instanceof Error ? err.message : "Erro" };
@@ -509,12 +509,12 @@ export const processIncomingWhatsAppMessage = createServerFn({ method: "POST" })
         taxa_entrega: Number(settings?.delivery_fee ?? 0),
       },
       produtos: (products ?? []).map((p: Record<string, unknown>) => ({
-        nome: p.name,
-        categoria: (p.categories as any)?.name ?? null,
-        descricao: p.description,
-        preco: Number(p.price),
-        disponivel: p.is_active && !p.is_sold_out,
-        esgotado: p.is_sold_out,
+        nome: p['name'],
+        categoria: (p['categories'] as any)?.name ?? null,
+        descricao: p['description'],
+        preco: Number(p['price']),
+        disponivel: p['is_active'] && !p['is_sold_out'],
+        esgotado: p['is_sold_out'],
       })),
     };
 
