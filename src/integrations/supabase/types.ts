@@ -1341,30 +1341,57 @@ export type Database = {
       whatsapp_config: {
         Row: {
           access_token: string | null
+          app_secret_hash: string | null
           business_account_id: string | null
+          endpoint_url: string | null
           id: boolean
           is_active: boolean
+          is_connected: boolean
+          last_test_error: string | null
+          last_test_status: string | null
+          last_tested_at: string | null
+          phone_number: string | null
           phone_number_id: string | null
+          provider: string
           updated_at: string
           webhook_url: string | null
+          webhook_verify_token: string | null
         }
         Insert: {
           access_token?: string | null
+          app_secret_hash?: string | null
           business_account_id?: string | null
+          endpoint_url?: string | null
           id?: boolean
           is_active?: boolean
+          is_connected?: boolean
+          last_test_error?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          phone_number?: string | null
           phone_number_id?: string | null
+          provider?: string
           updated_at?: string
           webhook_url?: string | null
+          webhook_verify_token?: string | null
         }
         Update: {
           access_token?: string | null
+          app_secret_hash?: string | null
           business_account_id?: string | null
+          endpoint_url?: string | null
           id?: boolean
           is_active?: boolean
+          is_connected?: boolean
+          last_test_error?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          phone_number?: string | null
           phone_number_id?: string | null
+          provider?: string
           updated_at?: string
           webhook_url?: string | null
+          webhook_verify_token?: string | null
         }
         Relationships: []
       }
