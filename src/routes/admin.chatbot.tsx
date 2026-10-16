@@ -35,10 +35,58 @@ export const Route = createFileRoute("/admin/chatbot")({
 // ============================================================
 const GEMINI_MODELS_FREE = [
   {
-    id: "gemini-3.5-flash-lite",
-    name: "Gemini 3.5 Flash Lite",
+    id: "gemma-4-31b-it",
+    name: "Gemma 4 31B",
     tag: "RECOMENDADO",
     tagColor: "bg-green-600",
+    desc: "Modelo principal para atendimento inteligente, conversas longas e maior consistência.",
+    speed: "Rápido",
+    quality: "Excelente para atendimento complexo",
+    rpm: 30,
+    rpd: 14400,
+    tpm: 16000,
+    estimatedDailyConversations: "~1.500+",
+    freeTier: true,
+    note: "Principal: limite exibido no AI Studio de 14.400 requisições/dia.",
+    recommended: true,
+  },
+  {
+    id: "gemma-4-26b-a4b-it",
+    name: "Gemma 4 26B A4B",
+    tag: "ECONÔMICO",
+    tagColor: "bg-emerald-600",
+    desc: "Alternativa mais eficiente, mantendo boa capacidade de raciocínio e atendimento.",
+    speed: "Muito rápido",
+    quality: "Muito boa para atendimento geral",
+    rpm: 30,
+    rpd: 14400,
+    tpm: 16000,
+    estimatedDailyConversations: "~1.500+",
+    freeTier: true,
+    note: "Fallback econômico com a mesma cota exibida para o projeto.",
+    recommended: false,
+  },
+  {
+    id: "gemini-3.8-flash",
+    name: "Gemini 3.8 Flash",
+    tag: "RECOMENDADO",
+    tagColor: "bg-green-600",
+    desc: "Modelo estável atual, recomendado para novos projetos e fluxos de atendimento.",
+    speed: "Rápido",
+    quality: "Excelente para atendimento complexo",
+    rpm: 10,
+    rpd: 500,
+    tpm: 250000,
+    estimatedDailyConversations: "~50–100",
+    freeTier: true,
+    note: "Substitui automaticamente configurações legadas do Gemini 2.5",
+    recommended: true,
+  },
+  {
+    id: "gemini-3.5-flash-lite",
+    name: "Gemini 3.5 Flash Lite",
+    tag: "ECONÔMICO",
+    tagColor: "bg-emerald-600",
     desc: "Modelo mais leve e rápido. Ideal para atendimento de alto volume.",
     speed: "Muito rápido",
     quality: "Boa para atendimento simples",
@@ -48,7 +96,23 @@ const GEMINI_MODELS_FREE = [
     estimatedDailyConversations: "~150–300",
     freeTier: true,
     note: "Recomendado para volume alto e respostas objetivas",
-    recommended: true,
+    recommended: false,
+  },
+  {
+    id: "gemini-3.8-flash-lite",
+    name: "Gemini 3.8 Flash Lite",
+    tag: "EXPERIMENTAL",
+    tagColor: "bg-amber-600",
+    desc: "Opção econômica solicitada. Só funcionará se este ID estiver liberado na sua conta/API.",
+    speed: "Muito rápido (estimado)",
+    quality: "Boa para atendimento simples (estimado)",
+    rpm: 5,
+    rpd: 20,
+    tpm: 250000,
+    estimatedDailyConversations: "~10–20",
+    freeTier: true,
+    note: "Cota especulativa, não confirmada pela documentação pública; valide em Atualizar modelos da conta.",
+    recommended: false,
   },
   {
     id: "gemini-3.5-flash",
@@ -147,7 +211,7 @@ function AdminChatbotPage() {
   const [greeting, setGreeting] = useState("");
   const [isActiveSite, setIsActiveSite] = useState(false);
   const [isActiveWA, setIsActiveWA] = useState(false);
-  const [geminiModel, setGeminiModel] = useState("gemini-3.5-flash-lite");
+  const [geminiModel, setGeminiModel] = useState("gemma-4-31b-it");
   const [dailyLimit, setDailyLimit] = useState(500);
   const [contextWindow, setContextWindow] = useState(5);
   const [freeTierOnly, setFreeTierOnly] = useState(true);
@@ -189,7 +253,7 @@ function AdminChatbotPage() {
 
   useEffect(() => {
     if (geminiConfig) {
-      setGeminiModel((geminiConfig as any).gemini_model ?? "gemini-3.5-flash-lite");
+      setGeminiModel((geminiConfig as any).gemini_model ?? "gemma-4-31b-it");
       setDailyLimit((geminiConfig as any).daily_limit ?? 500);
       setIsActiveWA((geminiConfig as any).is_active ?? false);
       setFreeTierOnly((geminiConfig as any).free_tier_only ?? true);
@@ -725,6 +789,7 @@ function AdminChatbotPage() {
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription className="text-xs space-y-1">
+                  <p><strong>Configuração escolhida:</strong> Gemma 4 31B como modelo principal e Gemma 4 26B A4B como alternativa econômica. Pelos limites exibidos no seu AI Studio, ambos suportam planejamento de até <strong>1.500 mensagens/dia</strong>, desde que cada mensagem faça uma única chamada e o limite de 16K tokens/minuto não seja excedido.</p>
                   <p><strong>Atenção sobre conversas vs. requisições:</strong> Uma conversa pode gerar múltiplas requisições à API (uma por mensagem). Com 500 requisições/dia e 5 msgs por conversa, isso equivale a aproximadamente 100 conversas/dia.</p>
                   <p><strong>O contador interno do sistema</strong> (campo "Limite diário") registra apenas as chamadas feitas pelo seu painel — não representa o consumo total do seu projeto Google.</p>
                   <p><strong>Para limites do seu projeto específico</strong>, acesse{" "}
@@ -773,7 +838,7 @@ function AdminChatbotPage() {
                   </tbody>
                 </table>
                 <div className="p-2 bg-slate-50 text-[10px] text-muted-foreground border-t">
-                  Fonte: ai.google.dev/pricing (outubro 2026). Limites podem variar por conta/região. RPM = requisições/minuto, RPD = requisições/dia, TPM = tokens/minuto.
+                  Valores de RPM/RPD/TPM exibidos para planejamento; confirme os limites ativos no Google AI Studio. RPM = requisições/minuto, RPD = requisições/dia, TPM = tokens/minuto.
                 </div>
               </div>
             </CardContent>

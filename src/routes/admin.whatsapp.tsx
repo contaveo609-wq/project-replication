@@ -112,6 +112,7 @@ function AdminWhatsappPage() {
           phone_number_id: phoneNumberId,
           business_account_id: wabaId,
           webhook_verify_token: webhookVerifyToken,
+          webhook_url: webhookEndpoint,
           app_secret: appSecret || undefined,
         },
       });

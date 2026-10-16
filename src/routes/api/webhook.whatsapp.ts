@@ -13,6 +13,7 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
+import { processIncomingWhatsAppMessage } from "@/lib/whatsapp.server";
 
 export const Route = createFileRoute("/api/webhook/whatsapp")({
   server: {
@@ -106,24 +107,27 @@ export const Route = createFileRoute("/api/webhook/whatsapp")({
 
             if (!from || !messageId || !body) continue;
 
-            // 5. Dispatch to AI processing (fire and forget to respond 200 quickly)
-            const { error: insertError } = await (supabaseAdmin as any).from("whatsapp_events").insert({
-              waba_message_id: messageId,
-              from_phone: from,
-              from_name: name ?? null,
-              message_type: "text",
-              message_body: body,
-              status: "received",
-              raw_payload: payload,
+            // 5. Process the message. The processor owns deduplication and
+            // event persistence, so retries from Meta cannot send two replies.
+            const result = await processIncomingWhatsAppMessage({
+              data: {
+                from,
+                name,
+                messageId,
+                body,
+                messageType: "text",
+                rawPayload: payload,
+              },
             });
-            if (insertError) {
-              console.error("[Webhook] Insert error:", insertError.message);
+            if (!(result as any)?.success) {
+              console.error("[Webhook] Processing error:", (result as any)?.error ?? "unknown error");
             }
           }
         }
       }
 
-      // 6. Respond 200 immediately (Meta requires fast response)
+      // 6. Acknowledge after processing. Retries remain safe because the
+      // message ID is unique and checked by the processor.
       return new Response("EVENT_RECEIVED", { status: 200 });
     } catch (err: unknown) {
       console.error("[Webhook] Unhandled error:", err instanceof Error ? err.message : err);
