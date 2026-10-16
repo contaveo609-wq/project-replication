@@ -35,12 +35,12 @@ export const Route = createFileRoute("/admin/chatbot")({
 // ============================================================
 const GEMINI_MODELS_FREE = [
   {
-    id: "gemma-4-31b-it",
-    name: "Gemma 4 31B",
+    id: "gemini-flash-lite-latest",
+    name: "Gemini Flash Lite (rápido)",
     tag: "RECOMENDADO",
     tagColor: "bg-green-600",
-    desc: "Modelo principal para atendimento inteligente, conversas longas e maior consistência.",
-    speed: "Rápido",
+    desc: "Resposta em menos de 1 segundo. Ideal para atendimento 24h no WhatsApp.",
+    speed: "Muito rápido",
     quality: "Excelente para atendimento complexo",
     rpm: 30,
     rpd: 14400,
