@@ -16,6 +16,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { normalizeGeminiModel } from "@/lib/gemini-model";
 
 function maskKey(key: string): string {
   if (!key || key.length < 8) return "****";
@@ -229,7 +230,7 @@ export const saveGeminiConfig = createServerFn({ method: "POST" })
     // Build payload — uses upsert with id=true (singleton row pattern)
     const payload: Record<string, unknown> = {
       id: true, // singleton constraint
-      gemini_model: data.gemini_model,
+      gemini_model: normalizeGeminiModel(data.gemini_model),
       ai_instructions: data.ai_instructions,
       is_active: data.is_active,
       daily_limit: data.daily_limit,
@@ -285,7 +286,7 @@ export const testGeminiConnection = createServerFn({ method: "POST" })
       .from("gemini_config")
       .select("gemini_model")
       .maybeSingle();
-    const model = config?.gemini_model ?? "gemini-3.5-flash-lite";
+    const model = normalizeGeminiModel(config?.gemini_model);
     try {
       const start = Date.now();
       const controller = new AbortController();
@@ -359,6 +360,7 @@ export const getGeminiConfigSafe = createServerFn({ method: "GET" })
     // NEVER return the actual key — only masked version and source
     return {
       ...(data ?? {}),
+      gemini_model: normalizeGeminiModel(data?.gemini_model),
       has_api_key: hasApiKey,
       api_key_source: hasEnvKey ? "env" : hasDbKey ? "db" : null,
       // Remove encrypted key from response
@@ -409,6 +411,7 @@ export const processIncomingWhatsAppMessage = createServerFn({ method: "POST" })
       messageId: z.string(),
       body: z.string(),
       messageType: z.string().default("text"),
+      rawPayload: z.record(z.string(), z.unknown()).optional(),
     }).parse(data)
   )
   .handler(async ({ data }) => {
@@ -423,14 +426,21 @@ export const processIncomingWhatsAppMessage = createServerFn({ method: "POST" })
     if (existing) return { success: true, skipped: true, reason: "duplicate" };
 
     // Insert event record
-    await (supabaseAdmin as any).from("whatsapp_events").insert({
+    const { error: insertError } = await (supabaseAdmin as any).from("whatsapp_events").insert({
       waba_message_id: data.messageId,
       from_phone: data.from,
       from_name: data.name ?? null,
       message_type: data.messageType,
       message_body: data.body,
       status: "processing",
+      raw_payload: data.rawPayload ?? null,
     });
+    if (insertError) {
+      if (insertError.code === "23505") {
+        return { success: true, skipped: true, reason: "duplicate" };
+      }
+      return { success: false, error: `Falha ao registrar evento: ${insertError.message}` };
+    }
 
     const [{ data: geminiConfig }, { data: waConfig }] = await Promise.all([
       (supabaseAdmin as any).from("gemini_config").select("*").maybeSingle(),
@@ -532,7 +542,7 @@ export const processIncomingWhatsAppMessage = createServerFn({ method: "POST" })
       return { success: false, error: "Chave Gemini nao configurada" };
     }
 
-    const model = geminiConfig.gemini_model ?? "gemini-3.5-flash-lite";
+    const model = normalizeGeminiModel(geminiConfig.gemini_model);
 
     // Build contents: last N messages + current message
     const contents = [
@@ -754,17 +764,24 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
         ? `Chave encontrada (${geminiKey.startsWith("AIza") ? "formato valido" : "formato nao padrao"})`
         : "Chave ausente — salve no painel ou defina GEMINI_API_KEY no servidor",
     }));
-    await run("gemini_model", "Gemini: Modelo Configurado", async () => ({
-      ok: !!(geminiConfig?.gemini_model),
-      detail: geminiConfig?.gemini_model ?? "Nenhum modelo selecionado",
-    }));
+    await run("gemini_model", "Gemini: Modelo Configurado", async () => {
+      const configuredModel = geminiConfig?.gemini_model;
+      const effectiveModel = normalizeGeminiModel(configuredModel);
+      return {
+        ok: !!configuredModel,
+        detail:
+          configuredModel && configuredModel !== effectiveModel
+            ? `${configuredModel} → ${effectiveModel} (migração automática)`
+            : configuredModel ?? "Nenhum modelo selecionado",
+      };
+    });
     await run("gemini_active", "Gemini: IA Ativa para WhatsApp", async () => ({
       ok: !!(geminiConfig?.is_active),
       detail: geminiConfig?.is_active ? "IA ativada" : "IA desativada — ative nas configuracoes",
     }));
     await run("gemini_api", "Gemini: Chamada Real de Validacao", async () => {
       if (!geminiKey) return { ok: false, detail: "Chave Gemini nao configurada — pendencia externa" };
-      const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
+      const model = normalizeGeminiModel(geminiConfig?.gemini_model);
       try {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
@@ -789,7 +806,7 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
     // Context memory test
     await run("gemini_context", "Gemini: Memoria Contextual (5 mensagens)", async () => {
       if (!geminiKey) return { ok: false, detail: "Requer chave Gemini configurada" };
-      const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
+      const model = normalizeGeminiModel(geminiConfig?.gemini_model);
       try {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
@@ -825,7 +842,7 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
     // Full flow test
     await run("full_flow", "Fluxo Completo: Simulacao de Atendimento", async () => {
       if (!geminiKey) return { ok: false, detail: "Requer chave Gemini configurada" };
-      const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
+      const model = normalizeGeminiModel(geminiConfig?.gemini_model);
       const { data: products } = await (supabaseAdmin as any)
         .from("products")
         .select("name,price,is_active")
@@ -861,12 +878,15 @@ export const runIntegrationTests = createServerFn({ method: "POST" })
       }
     });
 
-    await run("webhook_configured", "WhatsApp: Webhook Configurado", async () => ({
-      ok: !!(waConfig?.endpoint_url && waConfig?.webhook_verify_token),
-      detail: waConfig?.endpoint_url
-        ? `URL: ${waConfig.endpoint_url}`
-        : "URL do webhook nao configurada. Configure no app.facebook.com/developers",
-    }));
+    await run("webhook_configured", "WhatsApp: Webhook Configurado", async () => {
+      const endpoint = waConfig?.endpoint_url || "/api/webhook/whatsapp";
+      return {
+        ok: !!waConfig?.webhook_verify_token,
+        detail: waConfig?.webhook_verify_token
+          ? `Rota pronta: ${endpoint}. Confirme esta URL no painel da Meta.`
+          : "Token de verificacao ausente — salve-o e use a rota /api/webhook/whatsapp no painel da Meta",
+      };
+    });
 
     return { results, testedAt: new Date().toISOString() };
   });
@@ -935,7 +955,7 @@ export const simulateConversation = createServerFn({ method: "POST" })
       })),
     };
 
-    const model = geminiConfig?.gemini_model ?? "gemini-3.5-flash-lite";
+    const model = normalizeGeminiModel(geminiConfig?.gemini_model);
     const systemInstruction = [
       geminiConfig?.ai_instructions ?? "Voce e um atendente virtual.",
       `\nDADOS: ${JSON.stringify(knowledge)}`,
