@@ -253,9 +253,9 @@ function AdminChatbotPage() {
 
   useEffect(() => {
     if (geminiConfig) {
-      setGeminiModel((geminiConfig as any).gemini_model ?? "gemma-4-31b-it");
+      setGeminiModel((geminiConfig as any).gemini_model ?? "gemini-flash-lite-latest");
       setDailyLimit((geminiConfig as any).daily_limit ?? 500);
-      setIsActiveWA((geminiConfig as any).is_active ?? false);
+      setIsActiveWA((geminiConfig as any).is_active ?? true);
       setFreeTierOnly((geminiConfig as any).free_tier_only ?? true);
       setContextWindow((geminiConfig as any).context_window ?? 5);
       // If key is configured, stay in hidden mode
