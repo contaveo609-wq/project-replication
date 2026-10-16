@@ -15,6 +15,13 @@
       "when": 1792087894255,
       "tag": "0001_gemini_config_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792125103322,
+      "tag": "0002_gemma_default_and_webhook_url",
+      "breakpoints": true
     }
   ]
 }
