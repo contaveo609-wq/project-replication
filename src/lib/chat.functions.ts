@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { normalizeGeminiModel } from "@/lib/gemini-model";
 
 const chatSchema = z.object({
   messages: z
@@ -16,8 +17,13 @@ const chatSchema = z.object({
 export const askAttendant = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => chatSchema.parse(data))
   .handler(async ({ data }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: gem } = await (supabaseAdmin as any)
+      .from("gemini_config")
+      .select("gemini_api_key_encrypted, gemini_model")
+      .maybeSingle();
+    const apiKey: string | undefined = gem?.gemini_api_key_encrypted ?? process.env["GEMINI_API_KEY"];
+    const model = normalizeGeminiModel(gem?.gemini_model);
 
     const [{ data: settings }, { data: bot }, { data: products }] = await Promise.all([
       supabaseAdmin.from("store_settings").select("*").maybeSingle(),
@@ -88,15 +94,14 @@ export const askAttendant = createServerFn({ method: "POST" })
     ].join("\n");
 
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
-          "X-Lovable-AIG-SDK": "fetch",
         },
         body: JSON.stringify({
-          model: "google/gemini-3.8-flash",
+          model,
           messages: [{ role: "system", content: system }, ...data.messages],
         }),
       });
