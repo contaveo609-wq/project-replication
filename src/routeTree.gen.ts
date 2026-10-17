@@ -27,6 +27,7 @@ import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminConversasWhatsappRouteImport } from './routes/admin.conversas-whatsapp'
 import { Route as AdminCuponsRouteImport } from './routes/admin.cupons'
 import { Route as AdminEntregadoresRouteImport } from './routes/admin.entregadores'
 import { Route as AdminExpedicaoRouteImport } from './routes/admin.expedicao'
@@ -135,6 +136,11 @@ const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminConversasWhatsappRoute = AdminConversasWhatsappRouteImport.update({
+  id: '/conversas-whatsapp',
+  path: '/conversas-whatsapp',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCuponsRoute = AdminCuponsRouteImport.update({
   id: '/cupons',
   path: '/cupons',
@@ -238,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/conversas-whatsapp': typeof AdminConversasWhatsappRoute
   '/admin/cupons': typeof AdminCuponsRoute
   '/admin/entregadores': typeof AdminEntregadoresRoute
   '/admin/expedicao': typeof AdminExpedicaoRoute
@@ -273,6 +280,7 @@ export interface FileRoutesByTo {
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/conversas-whatsapp': typeof AdminConversasWhatsappRoute
   '/admin/cupons': typeof AdminCuponsRoute
   '/admin/entregadores': typeof AdminEntregadoresRoute
   '/admin/expedicao': typeof AdminExpedicaoRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/conversas-whatsapp': typeof AdminConversasWhatsappRoute
   '/admin/cupons': typeof AdminCuponsRoute
   '/admin/entregadores': typeof AdminEntregadoresRoute
   '/admin/expedicao': typeof AdminExpedicaoRoute
@@ -349,6 +358,7 @@ export interface FileRouteTypes {
     | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/conversas-whatsapp'
     | '/admin/cupons'
     | '/admin/entregadores'
     | '/admin/expedicao'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
     | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/conversas-whatsapp'
     | '/admin/cupons'
     | '/admin/entregadores'
     | '/admin/expedicao'
@@ -421,6 +432,7 @@ export interface FileRouteTypes {
     | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/conversas-whatsapp'
     | '/admin/cupons'
     | '/admin/entregadores'
     | '/admin/expedicao'
@@ -584,6 +596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConfiguracoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/conversas-whatsapp': {
+      id: '/admin/conversas-whatsapp'
+      path: '/conversas-whatsapp'
+      fullPath: '/admin/conversas-whatsapp'
+      preLoaderRoute: typeof AdminConversasWhatsappRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cupons': {
       id: '/admin/cupons'
       path: '/cupons'
@@ -725,6 +744,7 @@ interface AdminRouteChildren {
   AdminChatbotRoute: typeof AdminChatbotRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
+  AdminConversasWhatsappRoute: typeof AdminConversasWhatsappRoute
   AdminCuponsRoute: typeof AdminCuponsRoute
   AdminEntregadoresRoute: typeof AdminEntregadoresRoute
   AdminExpedicaoRoute: typeof AdminExpedicaoRoute
@@ -749,6 +769,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminChatbotRoute: AdminChatbotRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
+  AdminConversasWhatsappRoute: AdminConversasWhatsappRoute,
   AdminCuponsRoute: AdminCuponsRoute,
   AdminEntregadoresRoute: AdminEntregadoresRoute,
   AdminExpedicaoRoute: AdminExpedicaoRoute,

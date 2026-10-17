@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS public.gemini_config (
   gemini_api_key_masked text,
   gemini_api_key_encrypted text,
   gemini_api_key_set_at timestamptz,
-  gemini_model text NOT NULL DEFAULT 'gemini-2.5-flash-lite-preview-06-17',
+  gemini_model text NOT NULL DEFAULT 'gemma-4-31b-it',
   is_active boolean NOT NULL DEFAULT false,
   ai_instructions text NOT NULL DEFAULT 'Voce e a Brenda, atendente virtual da Skina do Frango & Assados no WhatsApp. Responda de forma curta, simpatica e objetiva.',
   daily_limit integer NOT NULL DEFAULT 500,

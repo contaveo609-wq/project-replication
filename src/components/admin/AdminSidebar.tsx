@@ -183,6 +183,14 @@ export function AdminSidebar({ onLogout }: { onLogout: () => void }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive("/admin/conversas-whatsapp")} tooltip="Conversas WhatsApp">
+                  <Link to="/admin/conversas-whatsapp">
+                    <MessageSquare className="text-green-600" />
+                    <span>Conversas WhatsApp</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/admin/whatsapp")} tooltip="Integração WhatsApp">
                   <Link to="/admin/whatsapp">
                     <Phone className="text-green-500" />

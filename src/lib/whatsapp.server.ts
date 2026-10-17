@@ -63,6 +63,13 @@ const testMessageSchema = z.object({
   message: z.string().min(1).max(1000),
 });
 
+const conversationPhoneSchema = z.object({ phone: z.string().min(10) });
+const manualMessageSchema = z.object({
+  to_phone: z.string().min(10),
+  message: z.string().trim().min(1).max(1000),
+  display_name: z.string().trim().max(120).optional(),
+});
+
 // ============================================================
 // WhatsApp Config
 // ============================================================
@@ -399,6 +406,135 @@ export const getConversationHistory = createServerFn({ method: "POST" })
     return { messages: (messages ?? []).reverse() };
   });
 
+/**
+ * Data for the operator inbox.  It intentionally goes through a server
+ * function: browser code never gets the Meta token or direct write access to
+ * the conversation tables.
+ */
+export const getWhatsAppConversations = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: conversations, error } = await (supabaseAdmin as any)
+      .from("whatsapp_conversations")
+      .select("phone,display_name,is_human_takeover,human_takeover_at,last_message_at,created_at")
+      .order("last_message_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+
+    // One compact query supplies previews without making one request per chat.
+    const { data: recentMessages } = await (supabaseAdmin as any)
+      .from("conversation_messages")
+      .select("conversation_phone,role,content,created_at")
+      .order("created_at", { ascending: false })
+      .limit(800);
+    const previews = new Map<string, any>();
+    for (const message of recentMessages ?? []) {
+      if (!previews.has(message.conversation_phone)) previews.set(message.conversation_phone, message);
+    }
+    return {
+      conversations: (conversations ?? []).map((conversation: any) => ({
+        ...conversation,
+        last_message: previews.get(conversation.phone) ?? null,
+      })),
+    };
+  });
+
+export const getWhatsAppConversation = createServerFn({ method: "POST" })
+  .validator((data: unknown) =>
+    conversationPhoneSchema.extend({ limit: z.number().int().min(1).max(500).default(200) }).parse(data)
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: conversation, error: conversationError }, { data: messages, error: messagesError }] = await Promise.all([
+      (supabaseAdmin as any)
+        .from("whatsapp_conversations")
+        .select("phone,display_name,is_human_takeover,human_takeover_at,last_message_at,created_at")
+        .eq("phone", data.phone)
+        .maybeSingle(),
+      (supabaseAdmin as any)
+        .from("conversation_messages")
+        .select("role,content,created_at")
+        .eq("conversation_phone", data.phone)
+        .order("created_at", { ascending: false })
+        .limit(data.limit),
+    ]);
+    if (conversationError) throw new Error(conversationError.message);
+    if (messagesError) throw new Error(messagesError.message);
+    return { conversation, messages: (messages ?? []).reverse() };
+  });
+
+export const takeHumanTakeover = createServerFn({ method: "POST" })
+  .validator((data: unknown) =>
+    conversationPhoneSchema.extend({ display_name: z.string().trim().max(120).optional() }).parse(data)
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const now = new Date().toISOString();
+    const { error } = await (supabaseAdmin as any).from("whatsapp_conversations").upsert({
+      phone: data.phone,
+      display_name: data.display_name || null,
+      is_human_takeover: true,
+      human_takeover_at: now,
+      last_message_at: now,
+    }, { onConflict: "phone" });
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+/** Send an operator message and retain it in the same history used by the AI. */
+export const sendManualWhatsAppMessage = createServerFn({ method: "POST" })
+  .validator((data: unknown) => manualMessageSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: config } = await (supabaseAdmin as any)
+      .from("whatsapp_config")
+      .select("phone_number_id,is_connected")
+      .maybeSingle();
+    const accessToken = process.env["WHATSAPP_ACCESS_TOKEN"] ?? process.env["WHATSAPP_TOKEN"];
+    if (!accessToken) return { success: false, error: "WHATSAPP_ACCESS_TOKEN nao configurado." };
+    if (!config?.is_connected || !config?.phone_number_id)
+      return { success: false, error: "WhatsApp nao conectado ou Phone Number ID ausente." };
+
+    const phone = data.to_phone.replace(/\D/g, "");
+    try {
+      const response = await fetch(`https://graph.facebook.com/v20.0/${config.phone_number_id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: phone,
+          type: "text",
+          text: { body: data.message },
+        }),
+      });
+      const json = (await response.json()) as Record<string, any>;
+      if (!response.ok) return { success: false, error: json?.["error"]?.message ?? `HTTP ${response.status}` };
+
+      const now = new Date().toISOString();
+      const [conversationResult, messageResult] = await Promise.all([
+        (supabaseAdmin as any).from("whatsapp_conversations").upsert({
+          phone,
+          display_name: data.display_name || null,
+          is_human_takeover: true,
+          human_takeover_at: now,
+          last_message_at: now,
+        }, { onConflict: "phone" }),
+        // "model" is the existing outbound role accepted by the database check
+        // constraint. The inbox identifies it as an operator message while takeover is active.
+        (supabaseAdmin as any).from("conversation_messages").insert({
+          conversation_phone: phone,
+          role: "model",
+          content: data.message,
+        }),
+      ]);
+      const persisted = !conversationResult.error && !messageResult.error;
+      return { success: true, persisted, messageId: json?.["messages"]?.[0]?.id };
+    } catch (err: unknown) {
+      return { success: false, error: err instanceof Error ? err.message : "Erro desconhecido" };
+    }
+  });
+
 // ============================================================
 // Process Incoming WhatsApp Message (with 5-msg context window)
 // ============================================================
@@ -556,7 +692,7 @@ export const processIncomingWhatsAppMessage = createServerFn({ method: "POST" })
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 12000);
+      const timeout = setTimeout(() => controller.abort(), 20000);
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
         {
