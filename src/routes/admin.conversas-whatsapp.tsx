@@ -86,7 +86,7 @@ function WhatsAppConversationsPage() {
   const messages = ((conversationQuery.data as any)?.messages ?? []) as ChatMessage[];
 
   useEffect(() => {
-    if (!selectedPhone && conversations.length) setSelectedPhone(conversations[0].phone);
+    if (!selectedPhone && conversations.length) setSelectedPhone(conversations[0]!.phone);
   }, [conversations, selectedPhone]);
 
   useEffect(() => {
