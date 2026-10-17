@@ -35,12 +35,12 @@ export const Route = createFileRoute("/admin/chatbot")({
 // ============================================================
 const GEMINI_MODELS_FREE = [
   {
-    id: "gemini-flash-lite-latest",
-    name: "Gemini Flash Lite (rápido)",
+    id: "gemma-4-31b-it",
+    name: "Gemma 4 31B",
     tag: "RECOMENDADO",
     tagColor: "bg-green-600",
-    desc: "Resposta em menos de 1 segundo. Ideal para atendimento 24h no WhatsApp.",
-    speed: "Muito rápido",
+    desc: "Modelo principal para atendimento inteligente, conversas longas e maior consistência.",
+    speed: "Rápido",
     quality: "Excelente para atendimento complexo",
     rpm: 30,
     rpd: 14400,
@@ -253,9 +253,9 @@ function AdminChatbotPage() {
 
   useEffect(() => {
     if (geminiConfig) {
-      setGeminiModel((geminiConfig as any).gemini_model ?? "gemini-flash-lite-latest");
+      setGeminiModel((geminiConfig as any).gemini_model ?? "gemma-4-31b-it");
       setDailyLimit((geminiConfig as any).daily_limit ?? 500);
-      setIsActiveWA((geminiConfig as any).is_active ?? true);
+      setIsActiveWA((geminiConfig as any).is_active ?? false);
       setFreeTierOnly((geminiConfig as any).free_tier_only ?? true);
       setContextWindow((geminiConfig as any).context_window ?? 5);
       // If key is configured, stay in hidden mode
