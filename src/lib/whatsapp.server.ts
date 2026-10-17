@@ -509,7 +509,7 @@ export const sendManualWhatsAppMessage = createServerFn({ method: "POST" })
         }),
       });
       const json = (await response.json()) as Record<string, any>;
-      if (!response.ok) return { success: false, error: json?.error?.message ?? `HTTP ${response.status}` };
+      if (!response.ok) return { success: false, error: json?["error"]?.message ?? `HTTP ${response.status}` };
 
       const now = new Date().toISOString();
       const [conversationResult, messageResult] = await Promise.all([
@@ -529,7 +529,7 @@ export const sendManualWhatsAppMessage = createServerFn({ method: "POST" })
         }),
       ]);
       const persisted = !conversationResult.error && !messageResult.error;
-      return { success: true, persisted, messageId: json?.messages?.[0]?.id };
+      return { success: true, persisted, messageId: json?["messages"]?.[0]?.id };
     } catch (err: unknown) {
       return { success: false, error: err instanceof Error ? err.message : "Erro desconhecido" };
     }
